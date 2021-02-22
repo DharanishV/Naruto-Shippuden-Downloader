@@ -9,7 +9,7 @@ os.mkdir(path+"/Naruto_Shippuden")
 episodeStartNumber = 389
 
 for episodeNumber in range(episodeStartNumber, 501):
-    print("inside loop")
+    
     url = f"http://nt.manga47.net/Naruto_Shippuuden_Dub/{episodeNumber}.mp4"
     print(url)
     response = requests.get(url, stream=True)
