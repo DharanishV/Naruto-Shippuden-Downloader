@@ -1,30 +1,58 @@
 import requests
 import os
+import sys
+from rich.progress import (
+    BarColumn,
+    DownloadColumn,
+    TextColumn,
+    TransferSpeedColumn,
+    TimeRemainingColumn,
+    Progress,
+    TaskID,
+    track
+)
+from rich import print
 
-path = os.getcwd()
+path = os.path.dirname(__file__)
 
-os.mkdir(path+"/Naruto_Shippuden")
 
-##Enter the Starting episode number
-episodeStartNumber = 389
+try:
+    os.mkdir(path+"/Naruto_Shippuden")
+except:
+    print('folder found!')
 
-##Enter the End episode number
-episodeEndNumber = 500
+episodeStartNumber = 388
 
-for episodeNumber in range(episodeStartNumber, episodeEndNumber+1):
-    
-    ## URL constructed to point the episodes ( some episodes may not be available )
+prog = Progress(
+    BarColumn(bar_width=30),
+    "[progress.percentage]{task.percentage:>3.1f}%",
+    "•",
+    DownloadColumn(),
+    "•",
+    TimeRemainingColumn(),
+)
+
+for episodeNumber in range(episodeStartNumber, 501):
     url = f"http://nt.manga47.net/Naruto_Shippuuden_Dub/{episodeNumber}.mp4"
+
     print(url)
+
     response = requests.get(url, stream=True)
     
-    fileName = "Naruto_Shipudden " + url.split('/')[-1]
+    fileName = "Naruto_Shipudden_" + url.split('/')[-1]
+
+    contentLength = int(response.headers['Content-length'])
+
+    taskId = prog.add_task("download", total=contentLength)
     
-    with open("Naruto_shippuden/"+fileName,'wb') as downloadFile:
-        
-        for i in response.iter_content(chunk_size = 1024*1024):
+    with open(path+"/Naruto_Shippuden/"+fileName,'wb') as downloadFile:
+        prog.start()
+        for i in response.iter_content(chunk_size = 512):
             if i:
-                print("writing...")
                 downloadFile.write(i)
+                prog.update(taskId, advance = len(i))
             
     print(fileName + " downloaded")
+
+
+
